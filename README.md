@@ -1,131 +1,172 @@
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-import io
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import classification_report, accuracy_score, ConfusionMatrixDisplay
-from sklearn.ensemble import RandomForestClassifier
-from google.colab import files
+<h1 align="center">🏦 Customer Insurance Prediction</h1>
 
-def get_my_dataset():
-    try:
-        print(" Please upload your CSV file (it better have 'Age', 'EstimatedSalary', and 'Purchased'):")
-        user_files = files.upload()
-        if not user_files:
-            print(" No file uploaded. Try again, buddy.")
-            return None
-        file_name = list(user_files.keys())[0]
-        df_local = pd.read_csv(io.BytesIO(user_files[file_name]))
+<p align="center">
+Predicting insurance purchase using Machine Learning
+</p>
 
-        required_cols = {'Age', 'EstimatedSalary', 'Purchased'}
-        if not required_cols.issubset(df_local.columns):
-            print(f" Missing required columns! Found columns: {df_local.columns.tolist()}")
-            return None
+<hr>
 
-        print("\n Dataset loaded! Here's a sneak peek:")
-        print(df_local.head())
-        return df_local
-    except Exception as error:
-        print(" Something went wrong during dataset upload:", error)
-        return None
+<h2>🚀 Overview</h2>
+<p>
+This project predicts whether a customer will purchase insurance based on:
+</p>
 
-def process_data_in_my_way(df):
-    try:
-        features = df[['Age', 'EstimatedSalary']].copy()
-        target = df['Purchased']
+<ul>
+  <li><b>Age</b></li>
+  <li><b>Estimated Salary</b></li>
+</ul>
 
-        missing_count = features['EstimatedSalary'].isnull().sum()
-        if missing_count > 0:
-            med_salary = features['EstimatedSalary'].median()
-            features.loc[:, 'EstimatedSalary'] = features['EstimatedSalary'].fillna(med_salary)
-            print(f" Filled {missing_count} missing salary values with median = {med_salary}")
-        else:
-            print(" No missing salary values. We're good to go!")
-        return features, target
-    except Exception as e:
-        print(" Data processing hit a snag:", e)
-        return None, None
+<p>
+Instead of guessing, machine learning models are used to learn patterns and make predictions.
+</p>
 
-def show_my_plot(dataframe):
-    try:
-        print(" Hold tight, plotting the data now...")
-        plt.figure(figsize=(8, 5))
-        sns.scatterplot(x='Age', y='EstimatedSalary', hue='Purchased', data=dataframe, palette='Set1')
-        plt.title("Age vs Estimated Salary (and Purchases!)")
-        plt.xlabel("Age")
-        plt.ylabel("Estimated Salary")
-        plt.grid(True)
-        plt.show()
-    except Exception as ex:
-        print(" Plotting error! Details:", ex)
+<hr>
 
-def main():
-    df = get_my_dataset()
-    if df is None:
-        print(" Cannot continue without data. Exiting.")
-        return
+<h2>🎯 Goal</h2>
+<ul>
+  <li>Compare different classification algorithms</li>
+  <li>Identify the best-performing model</li>
+  <li>Understand the impact of age and salary</li>
+</ul>
 
-    X, y = process_data_in_my_way(df)
-    if X is None or y is None:
-        print(" Data processing failed. Game over.")
-        return
+<hr>
 
-    try:
-        X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=0.25, random_state=42
-        )
-        print(" Data split into training and testing sets.")
-    except Exception as err:
-        print(" Error during train/test split:", err)
-        return
+<h2>📊 Dataset</h2>
 
-    try:
-        scaler = StandardScaler()
-        X_train_scaled = scaler.fit_transform(X_train)
-        X_test_scaled = scaler.transform(X_test)
-        print(" Features scaled successfully.")
-    except Exception as err:
-        print(" Scaling failed:", err)
-        return
+<table>
+<tr><th>Feature</th><th>Description</th></tr>
+<tr><td>Age</td><td>Customer age</td></tr>
+<tr><td>EstimatedSalary</td><td>Income</td></tr>
+<tr><td>Purchased</td><td>0 = No, 1 = Yes</td></tr>
+</table>
 
-    try:
-        print(" Training RandomForestClassifier... stand by...")
-        rf_clf = RandomForestClassifier(n_estimators=100, random_state=42)
-        rf_clf.fit(X_train_scaled, y_train)
-    except Exception as err:
-        print(" Model training error:", err)
-        return
+<p>✔ Missing salary values are filled using <b>median</b></p>
 
-    try:
-        y_pred = rf_clf.predict(X_test_scaled)
-        acc = accuracy_score(y_test, y_pred)
-        print(f"\n Model Test Accuracy: {acc:.2f}")
-        print("\n Classification Report:")
-        print(classification_report(y_test, y_pred))
+<hr>
 
-        ConfusionMatrixDisplay.from_estimator(rf_clf, X_test_scaled, y_test, cmap="Blues")
-        plt.title("Confusion Matrix")
-        plt.show()
-    except Exception as err:
-        print(" Evaluation failed:", err)
+<h2>⚙️ Workflow</h2>
 
-    show_my_plot(df)
+<pre>
+Data → Preprocessing → Scaling → Training → Evaluation → Prediction
+</pre>
 
-    try:
-        print("\n Predicting on a few made-up customers...")
-        custom_data = pd.DataFrame({
-            'Age': [23, 37, 52, 48],
-            'EstimatedSalary': [45000, 78000, 120000, 99000]
-        })
-        custom_scaled = scaler.transform(custom_data)
-        custom_preds = rf_clf.predict(custom_scaled)
-        for idx, row in custom_data.iterrows():
-            result = " Purchased" if custom_preds[idx] == 1 else " Not Purchased"
-            print(f"Age {row['Age']}, Salary {row['EstimatedSalary']}: {result}")
-    except Exception as err:
-        print(" Custom prediction failed:", err)
+<ul>
+  <li>Data cleaning</li>
+  <li>Feature scaling (StandardScaler)</li>
+  <li>Train-test split (75/25)</li>
+  <li>Model training and evaluation</li>
+</ul>
 
-if __name__ == '__main__':
-    main()
+<hr>
+
+<h2>🤖 Models Used</h2>
+
+<ul>
+  <li>Logistic Regression</li>
+  <li>KNN</li>
+  <li>SVM</li>
+  <li>Decision Tree</li>
+  <li><b>Random Forest ⭐</b></li>
+  <li>Neural Network</li>
+</ul>
+
+<hr>
+
+<h2>📈 Evaluation Metrics</h2>
+
+<ul>
+  <li>Accuracy</li>
+  <li>Precision</li>
+  <li>Recall</li>
+  <li>F1 Score</li>
+</ul>
+
+<p><b>Random Forest performed the best overall</b></p>
+
+<hr>
+
+<h2>📉 Visualization</h2>
+
+<ul>
+  <li>Scatter plot of Age vs Salary</li>
+  <li>Colored by purchase decision</li>
+</ul>
+
+<hr>
+
+<h2>🔮 Sample Predictions</h2>
+
+<ul>
+  <li>Age 30 → Salary 87,000 → Likely</li>
+  <li>Age 40 → Median Salary → Unlikely</li>
+  <li>Age 22 → Salary 600,000 → Likely</li>
+  <li>Age 60 → High Salary → Likely</li>
+</ul>
+
+<hr>
+
+<h2>🧠 Key Insights</h2>
+
+<ul>
+  <li>Salary has more influence than age</li>
+  <li>Higher income → higher purchase probability</li>
+  <li>Age alone is not a strong factor</li>
+</ul>
+
+<hr>
+
+<h2>📚 Learnings</h2>
+
+<ul>
+  <li>Testing multiple models is important</li>
+  <li>Feature scaling improves performance</li>
+  <li>Random Forest works well for structured data</li>
+  <li>Visualization helps in understanding trends</li>
+</ul>
+
+<hr>
+
+<h2>🌍 Applications</h2>
+
+<h3>Marketing</h3>
+<ul>
+  <li>Target potential customers</li>
+  <li>Improve conversion rate</li>
+</ul>
+
+<h3>Business Strategy</h3>
+<ul>
+  <li>Predict customer behavior</li>
+  <li>Optimize insurance plans</li>
+</ul>
+
+<hr>
+
+<h2>🛠️ Tech Stack</h2>
+
+<ul>
+  <li>Python</li>
+  <li>Pandas, NumPy</li>
+  <li>Scikit-learn</li>
+  <li>Matplotlib, Seaborn</li>
+  <li>Google Colab</li>
+</ul>
+
+<hr>
+
+<h2>🚀 Future Improvements</h2>
+
+<ul>
+  <li>Add more features</li>
+  <li>Hyperparameter tuning</li>
+  <li>Build a web app</li>
+  <li>Auto-select best model</li>
+</ul>
+
+<hr>
+
+<h2>✅ Conclusion</h2>
+
+<p>
+This project shows how simple features like age and salary can be used to build meaningful machine learning models for prediction.
+</p>
